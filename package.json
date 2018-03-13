@@ -28,7 +28,7 @@
     "express-session": "^1.15.2",
     "jsonwebtoken": "^5.0.2",
     "method-override": "~2.1.2",
-    "moment": "~2.12.0",
+    "moment": "~2.21.0",
     "mongoose": "5.0.7",
     "morgan": "~1.2.2",
     "passport": "~0.3.2",
