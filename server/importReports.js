@@ -302,6 +302,12 @@ function processAttachment(auth, message, callback) {
               parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
                 //console.dir(JSON.stringify(result.feedback.report_metadata.org_name));
 
+                var begin = new Date(0);
+                begin.setSeconds(result.feedback.report_metadata.date_range.begin);
+
+                var end = new Date(0);
+                end.setSeconds(result.feedback.report_metadata.date_range.end);
+
                 // Create an instance of model SomeModel
                 var aggregateReportModel = new AggregateReport({
                   gmailId: message.id,
@@ -309,7 +315,11 @@ function processAttachment(auth, message, callback) {
                     orgName: result.feedback.report_metadata.org_name,
                     email: result.feedback.report_metadata.email,
                     extraContactInfo: result.feedback.report_metadata.extra_contact_info,
-                    reportId: result.feedback.report_metadata.reportId
+                    reportId: result.feedback.report_metadata.report_id,
+                    dateRange: {
+                      begin: begin,
+                      end: end
+                    },
                   },
                   policyPublished: {
                     domain: result.feedback.policy_published.domain,
