@@ -240,6 +240,15 @@ function processEmail(auth, message, callback) {
     }
 
     var fullMessage = response.data;
+
+    if (message.id == '161fa6521c6e2949'){
+      //console.log('Bad message --- %j', fullMessage);
+    } 
+    
+    if (message.id == '161fdf9847bccedc'){
+      //console.log('Good message --- %j', fullMessage);
+    } 
+    
     var headerMap = new Map(response.data.payload.headers.map((i) => [i.name, i.value]));
 
     var internalDate = new Date(0);
@@ -274,140 +283,67 @@ function processEmail(auth, message, callback) {
 * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function processAttachment(auth, message, callback) {
-  var gmail = google.gmail('v1');
-  var parts = message.payload.parts;
-  if (parts) {
-    console.log(message.id + " -- " + message.snippet  + " -- " + parts.length);
-    for (var i = 0; i < parts.length; i++) {
-      var part = parts[i];
-      if (part.filename && part.filename.length > 0) {
-        var attachId = part.body.attachmentId;
-        gmail.users.messages.attachments.get({
-          'auth':auth,
-          'id': attachId,
-          'messageId': message.id,
-          'userId': 'me'
-        }, function(err, attachment) {
-          if (err) {
-            console.log(attachment);
-            console.log('The users.messages.attachments.get call returned an error: ' + err);
-            callback(err, null);
-            return;
-          }
+  
+  var attachmentDetails = getAttachmentDetails(message);
 
-          const buffer = Buffer.from(attachment.data.data, 'base64');
-          zlib.unzip(buffer, (err, buffer) => {
-            if (!err) {
-              //console.log(buffer.toString());
-              parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
-                //console.dir(JSON.stringify(result.feedback.report_metadata.report_id));
-
-                var begin = new Date(0);
-                begin.setSeconds(result.feedback.report_metadata.date_range.begin);
-
-                var end = new Date(0);
-                end.setSeconds(result.feedback.report_metadata.date_range.end);
-
-                // Create an instance of model SomeModel
-                var aggregateReportModel = new AggregateReport({
-                  gmailId: message.id,
-                  reportMetadata: {
-                    orgName: result.feedback.report_metadata.org_name,
-                    email: result.feedback.report_metadata.email,
-                    extraContactInfo: result.feedback.report_metadata.extra_contact_info,
-                    reportId: result.feedback.report_metadata.report_id,
-                    dateRange: {
-                      begin: begin,
-                      end: end
-                    },
-                  },
-                  policyPublished: {
-                    domain: result.feedback.policy_published.domain,
-                    adkim: result.feedback.policy_published.adkim,
-                    aspf: result.feedback.policy_published.aspf,
-                    p: result.feedback.policy_published.p,
-                    sp: result.feedback.policy_published.sp,
-                    pct: result.feedback.policy_published.pct
-                  }
-                });
-
-                //TODO:  Add a null check before adding each part of the object.
-                //       Some reports don't have the auth_results.dkim section
-                for (var i = 0; i < result.feedback.record.length; i++){
-                  var record = {
-                    row: {
-                      sourceIp: result.feedback.record[i].row.source_ip,
-                      count: result.feedback.record[i].row.count,
-                      policyEvaluated: {
-                        disposition: result.feedback.record[i].row.policy_evaluated.disposition,
-                        dkim: result.feedback.record[i].row.policy_evaluated.dkim,
-                        spf: result.feedback.record[i].row.policy_evaluated.spf
-                      },
-                      identifiers: {
-                        headerFrom: result.feedback.record[i].identifiers.header_from
-                      }
-                    }
-                  }
-
-                  //Check for authResults and addThem
-                  if (result.feedback.record[i].auth_results){
-                    var authResultsObj = new Object();
-
-                    if(result.feedback.record[i].auth_results.spf){
-                      var spfObj = {
-                        domain: result.feedback.record[i].auth_results.spf.domain,
-                        result: result.feedback.record[i].auth_results.spf.result
-                      };
-
-                      authResultsObj.spf = spfObj;
-                    }
-
-                    if(result.feedback.record[i].auth_results.dkim){
-                      var dkimObj = {
-                        domain: result.feedback.record[i].auth_results.dkim.domain,
-                        result: result.feedback.record[i].auth_results.dkim.result
-                      };
-
-                      authResultsObj.dkim = dkimObj;
-                    }
-
-                    record.authResults = authResultsObj;
-                  }
-
-                  aggregateReportModel.record.push(record);
-                }
-
-                aggregateReportModel.save(function (err) {
-                  if (err){
-                    console.log(err);
-                    handleError(err);
-                    return;
-                  }
-
-                  console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
-                  callback(null, message);
-                  return;
-                });
-
-
-              });
-            } else {
-              // handle error
-              callback("Haven't implemented yet", null);
-              return;
-            }
-          });
-        });
-      }
-    }
-  } else{
-    //console.log("Haven't implemented this yet");
-    //TODO:  Implement logic for messages that don't include parts.
-
-    // console.dir(message, {depth: null, colors: true})
-    console.log('Haven\'t implemented this yet - %j', message);
+  if (!attachmentDetails.attachmentId){
+    callback("No attachment Id found", null);
   }
-}
+
+  var gmail = google.gmail('v1');
+  gmail.users.messages.attachments.get({
+    'auth':auth,
+    'id': attachmentDetails.attachmentId,
+    'messageId': message.id,
+    'userId': 'me'
+    }, function(err, attachment) {  
+      if (err) {
+        console.log('The users.messages.attachments.get call returned an error: ' + err);
+        callback(err, null);
+        return;
+      }
+
+      const buffer = Buffer.from(attachment.data.data, 'base64');      
+          
+      if (attachmentDetails.extension == 'gz'){
+            zlib.unzip(buffer, (err, buffer) => {
+            
+              if (!err) {
+                //console.log(buffer.toString());
+                parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+                  
+                 var aggregateReportModel = buildAggregateModel(message.id, result);
+                  
+                 aggregateReportModel.save(function (err) {
+                    if (err){
+                      console.log(err);
+                      handleError(err);
+                      return;
+                    }
+  
+                    console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
+                    callback(null, message);
+                    return;
+                  });
+  
+  
+                });
+              } else {
+                console.log(err);
+                callback("Haven't implemented yet", null);
+                return;
+              }
+            });
+          } else if(attachmentDetails.extension == 'zip'){
+            
+            console.log ("We don't support zip attachments")
+
+          } else {
+            callback("Inavlid attachment file extension on " + part.filename, null);
+          }
+          
+        });
+      }  
 
 /**
  * Update the label to indicate the message has been processed
@@ -434,4 +370,115 @@ function updateLabel(auth, messageId, labelId, callback) {
     }
     callback(null, "Label Updated");
   });
+}
+
+function getAttachmentDetails(message){
+
+  //Some emails contain an array of parts that include filename and 
+  //attachment id and some don't.  If 
+  var parts = message.payload.parts;
+  var attachmentId = message.payload.body.attachmentId;
+  var filename = message.payload.filename;
+  var extension;
+  
+  if(parts){
+    for (var i = 0; i < message.payload.parts.length; i++) {
+      var part = parts[i];
+      if (part.filename && part.filename.length > 0) {
+        attachmentId = part.body.attachmentId;
+        filename = part.filename;
+      }
+    }
+  }
+
+  if (filename){
+    extension = filename.split('.').pop();
+  }
+
+  attachmentDetails = {
+    attachmentId: attachmentId, 
+    filename: filename,
+    extension: extension
+  };
+  
+  return attachmentDetails;
+}
+
+function buildAggregateModel(messageId, result){
+    
+    var begin = new Date(0);
+    begin.setSeconds(result.feedback.report_metadata.date_range.begin);
+
+    var end = new Date(0);
+    end.setSeconds(result.feedback.report_metadata.date_range.end);
+
+    // Create an instance of model SomeModel
+    var aggregateReportModel = new AggregateReport({
+      gmailId: messageId,
+      reportMetadata: {
+        orgName: result.feedback.report_metadata.org_name,
+        email: result.feedback.report_metadata.email,
+        extraContactInfo: result.feedback.report_metadata.extra_contact_info,
+        reportId: result.feedback.report_metadata.report_id,
+        dateRange: {
+          begin: begin,
+          end: end
+        },
+      },
+      policyPublished: {
+        domain: result.feedback.policy_published.domain,
+        adkim: result.feedback.policy_published.adkim,
+        aspf: result.feedback.policy_published.aspf,
+        p: result.feedback.policy_published.p,
+        sp: result.feedback.policy_published.sp,
+        pct: result.feedback.policy_published.pct
+      }
+    });
+
+    //TODO:  Add a null check before adding each part of the object.
+    //       Some reports don't have the auth_results.dkim section
+    for (var i = 0; i < result.feedback.record.length; i++){
+      var record = {
+        row: {
+          sourceIp: result.feedback.record[i].row.source_ip,
+          count: result.feedback.record[i].row.count,
+          policyEvaluated: {
+            disposition: result.feedback.record[i].row.policy_evaluated.disposition,
+            dkim: result.feedback.record[i].row.policy_evaluated.dkim,
+            spf: result.feedback.record[i].row.policy_evaluated.spf
+          },
+          identifiers: {
+            headerFrom: result.feedback.record[i].identifiers.header_from
+          }
+        }
+      }
+
+      //Check for authResults and addThem
+      if (result.feedback.record[i].auth_results){
+        var authResultsObj = new Object();
+
+        if(result.feedback.record[i].auth_results.spf){
+          var spfObj = {
+            domain: result.feedback.record[i].auth_results.spf.domain,
+            result: result.feedback.record[i].auth_results.spf.result
+          };
+
+          authResultsObj.spf = spfObj;
+        }
+
+        if(result.feedback.record[i].auth_results.dkim){
+          var dkimObj = {
+            domain: result.feedback.record[i].auth_results.dkim.domain,
+            result: result.feedback.record[i].auth_results.dkim.result
+          };
+
+          authResultsObj.dkim = dkimObj;
+        }
+
+        record.authResults = authResultsObj;
+      }
+
+      aggregateReportModel.record.push(record);
+    }
+    return aggregateReportModel;
 }
