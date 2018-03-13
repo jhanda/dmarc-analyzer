@@ -125,7 +125,7 @@ function start(auth) {
 // ====================================================
 
 /**
- * Get the Labl ID for the label that will indicated the message
+ * Get the Label ID for the label that will indicate the message
  * has been processed succsefully.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
@@ -236,7 +236,7 @@ function processEmail(auth, message, callback) {
     var internalDate = new Date(0);
     internalDate.setUTCMilliseconds(fullMessage.internalDate);
 
-    // Create an instance of model SomeModel
+    // Create an instance of model Email
     var messageModel = new Email({ gmailId: message.id,
       snippet: fullMessage.snippet,
       labelIds: fullMessage.labelIds,
