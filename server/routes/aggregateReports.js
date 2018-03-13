@@ -5,8 +5,35 @@ var AggregateReport = require('../models/AggregateReport.js')
 /* GET all Aggregate Reports */
 router.get('/', function (req, res, next) {  
    
+    var select = "";
+    var queryObject = {}
+
+    //Check for filter query param, which should be a comma delimited list that
+    // can contain reportMetadata, record, or policyPublished
+    if (req.query.filter){
+
+        if(req.query.filter.includes("reportMetadata")){
+            select = select + " reportMetadata";
+        }
+
+        if(req.query.filter.includes("record")){
+            select = select + " record";
+        }
+        if(req.query.filter.includes("policyPublished")){
+            select = select + " policyPublished";
+        }
+    }
+
+    //Check for name filter
+    if (req.query.orgName){
+        queryObject = {'reportMetadata.orgName':req.query.orgName};
+    }
+    
+    console.log(queryObject);
+    
     AggregateReport.
-        find().
+        find(queryObject).
+        select(select).
         exec(function (err, docs) {
             res.json(docs);
         });
