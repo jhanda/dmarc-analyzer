@@ -35,6 +35,9 @@ yarn-error.log
 testem.log
 /typings
 
+# client_secret.json
+/server/client_secret.json
+
 # e2e
 /e2e/*.js
 /e2e/*.map

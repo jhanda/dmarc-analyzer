@@ -180,9 +180,9 @@ function processEmails(auth, labelId, callback) {
     labelIds:['Label_2']
   }, function(err, response) {
     if (err) {
-      console.log("error in process emails - " );
-      console.log('- %j', response);
-      console.log(err);
+      //console.log("error in process emails - " );
+      //console.log('- %j', response);
+      //console.log(err);
       callback(err, null); 
     }
 
@@ -208,7 +208,7 @@ function processEmails(auth, labelId, callback) {
                 callback(err, null);
               }
               
-              console.log(result);
+              //console.log(result);
 
             });
           });
@@ -274,7 +274,7 @@ function processAttachment(auth, message, callback) {
   var gmail = google.gmail('v1');
   var parts = message.payload.parts;
   if (parts) {
-    //console.log(message.id + " -- " + message.snippet  + " -- " + parts.length);
+    console.log(message.id + " -- " + message.snippet  + " -- " + parts.length);
    for (var i = 0; i < parts.length; i++) {
      var part = parts[i];
      if (part.filename && part.filename.length > 0) {
@@ -384,14 +384,14 @@ function processAttachment(auth, message, callback) {
 
 
       });
-    }
+     }
   }
   }else{
     //console.log("Haven't implemented this yet");
     //TODO:  Implement logic for messages that don't include parts.  
 
     // console.dir(message, {depth: null, colors: true})
-    console.log('- %j', message);
+    console.log('Haven\'t implemented this yet - %j', message);
 
   }
 
