@@ -300,7 +300,7 @@ function processAttachment(auth, message, callback) {
             if (!err) {
               //console.log(buffer.toString());
               parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
-                //console.dir(JSON.stringify(result.feedback.report_metadata.org_name));
+                //console.dir(JSON.stringify(result.feedback.report_metadata.report_id));
 
                 var begin = new Date(0);
                 begin.setSeconds(result.feedback.report_metadata.date_range.begin);

@@ -8,8 +8,8 @@ var AggregateReportSchema = new Schema({
   reportMetadata: {
     orgName: String,
     email: String,
-    extra_contact_info: String,
-    report_id: String,
+    extraContactInfo: String,
+    reportId: String,
     dateRange:{
       begin: Date, 
       end: Date
