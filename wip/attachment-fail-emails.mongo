@@ -1,0 +1,86 @@
+{
+	"_id" : ObjectId("5aa820673aadc30ba8047f1c"),
+	"gmailId" : "161fae563265777e",
+	"snippet" : "",
+	"labelIds" : [
+		"UNREAD",
+		"Label_2",
+		"CATEGORY_UPDATES",
+		"INBOX"
+	],
+	"internalDate" : ISODate("2018-03-06T10:39:51Z"),
+	"subject" : "Report Domain: liferay.com Submitter: reports.emailsrvr.com Report-ID: 85a8c746-1b4f-47a7-89e7-6f39b7ef4",
+	"from" : "DMARC Report <dmarc_reports@reports.emailsrvr.com>",
+	"sender" : "dmarc_reports@reports.emailsrvr.com",
+	"created_at" : ISODate("2018-03-13T19:03:03.246Z"),
+	"updated_at" : ISODate("2018-03-13T19:03:03.246Z"),
+	"__v" : 0
+}
+{
+	"_id" : ObjectId("5aa820673aadc30ba8047f2a"),
+	"gmailId" : "161fa6521c6e2949",
+	"snippet" : "This is a DMARC aggregate report for domain liferay.com on 20180302. For more information please mail to abuse@126.com.",
+	"labelIds" : [
+		"UNREAD",
+		"Label_2",
+		"CATEGORY_UPDATES",
+		"INBOX"
+	],
+	"internalDate" : ISODate("2018-03-06T08:19:44Z"),
+	"subject" : "Report Domain: liferay.com Submitter: 126.com Report-ID: aggr_report_liferay.com_20180302_126.com",
+	"from" : "<abuse@126.com>",
+	"created_at" : ISODate("2018-03-13T19:03:03.278Z"),
+	"updated_at" : ISODate("2018-03-13T19:03:03.278Z"),
+	"__v" : 0
+}
+{
+	"_id" : ObjectId("5aa820673aadc30ba8047f37"),
+	"gmailId" : "161fc45a248bca7b",
+	"snippet" : "This message is auto generated!",
+	"labelIds" : [
+		"UNREAD",
+		"Label_2",
+		"CATEGORY_PERSONAL",
+		"INBOX"
+	],
+	"internalDate" : ISODate("2018-03-06T17:04:31Z"),
+	"subject" : "Dmarc aggregate report",
+	"from" : "FP <FP@yesser.gov.sa>",
+	"created_at" : ISODate("2018-03-13T19:03:03.305Z"),
+	"updated_at" : ISODate("2018-03-13T19:03:03.305Z"),
+	"__v" : 0
+}
+{
+	"_id" : ObjectId("5aa820673aadc30ba8047f3e"),
+	"gmailId" : "161fafeb0d36d342",
+	"snippet" : "This is a DMARC aggregate report for liferay.com generated at Tue Mar 6 12:07:27 2018",
+	"labelIds" : [
+		"UNREAD",
+		"Label_2",
+		"CATEGORY_UPDATES",
+		"INBOX"
+	],
+	"internalDate" : ISODate("2018-03-06T11:07:27Z"),
+	"subject" : "Report Domain: liferay.com Submitter: seznam.cz Report-ID: szn_liferay.com-2018-03-05",
+	"from" : "\"Seznam.cz\" <abuse@seznam.cz>",
+	"created_at" : ISODate("2018-03-13T19:03:03.523Z"),
+	"updated_at" : ISODate("2018-03-13T19:03:03.523Z"),
+	"__v" : 0
+}
+{
+	"_id" : ObjectId("5aa820673aadc30ba8047f41"),
+	"gmailId" : "161fb830c133bf6f",
+	"snippet" : "This is an aggregate report from Yahoo! Inc.",
+	"labelIds" : [
+		"UNREAD",
+		"Label_2",
+		"CATEGORY_UPDATES",
+		"INBOX"
+	],
+	"internalDate" : ISODate("2018-03-06T13:32:03Z"),
+	"subject" : "Report Domain: liferay.com Submitter: yahoo.com Report-ID: <1520299215.611955>",
+	"from" : "noreply@dmarc.yahoo.com",
+	"created_at" : ISODate("2018-03-13T19:03:03.526Z"),
+	"updated_at" : ISODate("2018-03-13T19:03:03.526Z"),
+	"__v" : 0
+}
