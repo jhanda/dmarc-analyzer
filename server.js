@@ -3,14 +3,14 @@
 var bodyParser      = require('body-parser');
 var express         = require('express');
 var session         = require('express-session');
-var favicon 		    = require('serve-favicon');
+var favicon             = require('serve-favicon');
 var methodOverride  = require('method-override');
-var moment 			    = require('moment');
+var moment              = require('moment');
 var mongoose        = require('mongoose');
 var morgan          = require('morgan');
-var path 			      = require('path');
+var path                  = require('path');
 var port            = process.env.PORT || 9000;
-var request     	  = require ('request');
+var request           = require ('request');
 var app             = express();
 
 var passport = require('passport');

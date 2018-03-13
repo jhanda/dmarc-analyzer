@@ -13,7 +13,6 @@ const zlib          = require('zlib');
 mongoose.connect("mongodb://127.0.0.1/dmarc-analyzer");
 mongoose.set('debug', false);
 
-
 // If modifying these scopes, delete your previously saved credentials
 // at ~/.credentials/gmail-nodejs-quickstart.json
 var SCOPES = ['https://www.googleapis.com/auth/gmail.modify'];
@@ -112,7 +111,6 @@ function storeToken(token) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function start(auth) {
-
   //Find the label ID for the Processed label.
   getLabelId(auth, 'Processed', function(err, labelId){
     if (err){
@@ -120,24 +118,18 @@ function start(auth) {
     }
 
     processEmails(auth, labelId, function(err, result){
-
-
     });
   });
 }
 
-
-
-
-
-
+// ====================================================
 
 /**
- * Get the Labl ID for the label that will indicated the message 
- * has been processed succsefully.  
+ * Get the Labl ID for the label that will indicated the message
+ * has been processed succsefully.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- * @param {String} labelName Name of the requested label. 
+ * @param {String} labelName Name of the requested label.
  * @param {function} callback The callback to call with the authorized client.
  */
 function getLabelId(auth, labelName, callback) {
@@ -149,8 +141,9 @@ function getLabelId(auth, labelName, callback) {
   }, function(err, response) {
     if (err) {
       console.log('The API returned an error: ' + err);
-      callback (err, null);
+      callback(err, null);
     }
+
     var labels = response.data.labels;
     if (labels.length == 0) {
       console.log('No labels found.');
@@ -160,6 +153,7 @@ function getLabelId(auth, labelName, callback) {
           labelId = labels[i].id;
         }
       }
+
       return callback(null, labelId);
     }
   });
@@ -169,7 +163,7 @@ function getLabelId(auth, labelName, callback) {
  * Lists the messages in the user's account.
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
- * @param {String} labelId Id of the label to be applied to successfully processed messages.  
+ * @param {String} labelId Id of the label to be applied to successfully processed messages.
  * @param {function} callback The callback to call with the authorized client.
  */
 function processEmails(auth, labelId, callback) {
@@ -183,7 +177,7 @@ function processEmails(auth, labelId, callback) {
       //console.log("error in process emails - " );
       //console.log('- %j', response);
       //console.log(err);
-      callback(err, null); 
+      callback(err, null);
     }
 
     var messages = response.data.messages;
@@ -192,22 +186,20 @@ function processEmails(auth, labelId, callback) {
     } else {
       for (var i = 0; i < messages.length; i++) {
         processEmail(auth, messages[i], function(err, message){
-          
           if (err){
             callback(err, null);
           }
-          
+
           processAttachment(auth, message, function(err, message){
-            
             if(err){
               callback(err, null);
             }
-            
+
             updateLabel(auth, message.id, labelId, function(err, result){
               if(err){
                 callback(err, null);
               }
-              
+
               //console.log(result);
 
             });
@@ -232,16 +224,15 @@ function processEmail(auth, message, callback) {
     userId: 'me',
     id: message.id,
     format: 'full'
-  }, function(err, response) {    
-    
+  }, function(err, response) {
     if (err) {
       console.log(err);
       callback(err, null);
-    }    
+    }
 
     var fullMessage = response.data;
     var headerMap = new Map(response.data.payload.headers.map((i) => [i.name, i.value]));
-  
+
     var internalDate = new Date(0);
     internalDate.setUTCMilliseconds(fullMessage.internalDate);
 
@@ -251,15 +242,16 @@ function processEmail(auth, message, callback) {
       labelIds: fullMessage.labelIds,
       internalDate: internalDate,
       subject: headerMap.get("Subject"),
-      from: headerMap.get("From"), 
+      from: headerMap.get("From"),
       sender: headerMap.get("Sender")
     });
 
     messageModel.save(function (err) {
       if (err){
-          console.log(err);   
+          console.log(err);
           return handleError(err);
       }
+
       callback(null, fullMessage);
     });
   });
@@ -275,38 +267,39 @@ function processAttachment(auth, message, callback) {
   var parts = message.payload.parts;
   if (parts) {
     console.log(message.id + " -- " + message.snippet  + " -- " + parts.length);
-   for (var i = 0; i < parts.length; i++) {
-     var part = parts[i];
-     if (part.filename && part.filename.length > 0) {
-      var attachId = part.body.attachmentId;
-      gmail.users.messages.attachments.get({
-        'auth':auth,
-        'id': attachId,
-        'messageId': message.id,
-        'userId': 'me'
-      }, function(err, attachment) {
-        if (err) {
-          console.log(attachment);
-          console.log('The users.messages.attachments.get call returned an error: ' + err);
-          callback(err, null);
-        }    
+    for (var i = 0; i < parts.length; i++) {
+      var part = parts[i];
+      if (part.filename && part.filename.length > 0) {
+        var attachId = part.body.attachmentId;
+        gmail.users.messages.attachments.get({
+          'auth':auth,
+          'id': attachId,
+          'messageId': message.id,
+          'userId': 'me'
+        }, function(err, attachment) {
+          if (err) {
+            console.log(attachment);
+            console.log('The users.messages.attachments.get call returned an error: ' + err);
+            callback(err, null);
+          }
 
-        const buffer = Buffer.from(attachment.data.data, 'base64' );
-        zlib.unzip(buffer, (err, buffer) => {
-          if (!err) {
-            //console.log(buffer.toString());
-            parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+          const buffer = Buffer.from(attachment.data.data, 'base64');
+          zlib.unzip(buffer, (err, buffer) => {
+            if (!err) {
+              //console.log(buffer.toString());
+              parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
                 //console.dir(JSON.stringify(result.feedback.report_metadata.org_name));
-              
-              // Create an instance of model SomeModel
-              var aggregateReportModel = new AggregateReport({ 
-                gmailId: message.id,
-                reportMetadata: {
-                  orgName: result.feedback.report_metadata.org_name,
-                  email: result.feedback.report_metadata.email,
-                  extraContactInfo: result.feedback.report_metadata.extra_contact_info,
-                  reportId: result.feedback.report_metadata.reportId},
-                  policyPublished:{
+
+                // Create an instance of model SomeModel
+                var aggregateReportModel = new AggregateReport({
+                  gmailId: message.id,
+                  reportMetadata: {
+                    orgName: result.feedback.report_metadata.org_name,
+                    email: result.feedback.report_metadata.email,
+                    extraContactInfo: result.feedback.report_metadata.extra_contact_info,
+                    reportId: result.feedback.report_metadata.reportId
+                  },
+                  policyPublished: {
                     domain: result.feedback.policy_published.domain,
                     adkim: result.feedback.policy_published.adkim,
                     aspf: result.feedback.policy_published.aspf,
@@ -314,87 +307,82 @@ function processAttachment(auth, message, callback) {
                     sp: result.feedback.policy_published.sp,
                     pct: result.feedback.policy_published.pct
                   }
-              });
+                });
 
-              //TODO:  Add a null check before adding each part of the object.  
-              //       Some reports don't have the auth_results.dkim section
-              for (var i = 0; i < result.feedback.record.length; i++){
-                var record = { 
-                  row:{ 
-                    sourceIp:result.feedback.record[i].row.source_ip,
-                    count: result.feedback.record[i].row.count,
-                    policyEvaluated:{
-                      disposition:result.feedback.record[i].row.policy_evaluated.disposition,
-                      dkim:result.feedback.record[i].row.policy_evaluated.dkim,
-                      spf: result.feedback.record[i].row.policy_evaluated.spf
-                    },
-                    identifiers:{
-                      headerFrom: result.feedback.record[i].identifiers.header_from
+                //TODO:  Add a null check before adding each part of the object.
+                //       Some reports don't have the auth_results.dkim section
+                for (var i = 0; i < result.feedback.record.length; i++){
+                  var record = {
+                    row: {
+                      sourceIp: result.feedback.record[i].row.source_ip,
+                      count: result.feedback.record[i].row.count,
+                      policyEvaluated: {
+                        disposition: result.feedback.record[i].row.policy_evaluated.disposition,
+                        dkim: result.feedback.record[i].row.policy_evaluated.dkim,
+                        spf: result.feedback.record[i].row.policy_evaluated.spf
+                      },
+                      identifiers: {
+                        headerFrom: result.feedback.record[i].identifiers.header_from
+                      }
                     }
                   }
-                }
 
-                //Check for authResults and addThem
-                if (result.feedback.record[i].auth_results){
-                  var authResultsObj = new Object();
+                  //Check for authResults and addThem
+                  if (result.feedback.record[i].auth_results){
+                    var authResultsObj = new Object();
 
-                  if(result.feedback.record[i].auth_results.spf){
-                    var spfObj = {
-                      domain:result.feedback.record[i].auth_results.spf.domain,
-                      result:result.feedback.record[i].auth_results.spf.result
-                    };
+                    if(result.feedback.record[i].auth_results.spf){
+                      var spfObj = {
+                        domain: result.feedback.record[i].auth_results.spf.domain,
+                        result: result.feedback.record[i].auth_results.spf.result
+                      };
 
-                    authResultsObj.spf = spfObj;
+                      authResultsObj.spf = spfObj;
+                    }
+
+                    if(result.feedback.record[i].auth_results.dkim){
+                      var dkimObj = {
+                        domain: result.feedback.record[i].auth_results.dkim.domain,
+                        result: result.feedback.record[i].auth_results.dkim.result
+                      };
+
+                      authResultsObj.dkim = dkimObj;
+                    }
+
+                    record.authResults = authResultsObj;
                   }
 
-                  if(result.feedback.record[i].auth_results.dkim){
-                    var dkimObj = {
-                      domain:result.feedback.record[i].auth_results.dkim.domain,
-                      result:result.feedback.record[i].auth_results.dkim.result
-                    };
-
-                    authResultsObj.dkim = dkimObj;
-                  }
-
-                  record.authResults = authResultsObj;
-
+                  aggregateReportModel.record.push(record);
                 }
 
-                aggregateReportModel.record.push(record);
-              }
-
-              aggregateReportModel.save(function (err) {
-                if (err){
-                    console.log(err);   
+                aggregateReportModel.save(function (err) {
+                  if (err){
+                    console.log(err);
                     return handleError(err);
-                }
-                console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
-                callback(null, message);
+                  }
+
+                  console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
+                  callback(null, message);
+                  return;
+                });
+
+
               });
-
-
-            });
-          } else {
-            // handle error
-            callback("Haven't implemeted yet", null);
-          }
+            } else {
+              // handle error
+              callback("Haven't implemented yet", null);
+            }
+          });
         });
-        
-
-
-
-      });
-     }
-  }
-  }else{
+      }
+    }
+  } else{
     //console.log("Haven't implemented this yet");
-    //TODO:  Implement logic for messages that don't include parts.  
+    //TODO:  Implement logic for messages that don't include parts.
 
     // console.dir(message, {depth: null, colors: true})
     console.log('Haven\'t implemented this yet - %j', message);
-
   }
-
 }
 
 /**
@@ -402,7 +390,7 @@ function processAttachment(auth, message, callback) {
  *
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  * @param {String} message Message
- * @param {String} labelId Name of the requested label. 
+ * @param {String} labelId Name of the requested label.
  * @param {function} callback The callback to call with the authorized client.
  */
 function updateLabel(auth, messageId, labelId, callback) {
@@ -416,11 +404,10 @@ function updateLabel(auth, messageId, labelId, callback) {
       addLabelIds:labelIds
     }
   }, function(err, updatedMmessage) {
-    
     if (err) {
       console.log('Error n the gmail.users.messages.modify call: ' + err);
       callback(err, null);
-    }    
+    }
     callback(null, "Label Updated");
   });
 }
