@@ -142,6 +142,7 @@ function getLabelId(auth, labelName, callback) {
     if (err) {
       console.log('The API returned an error: ' + err);
       callback(err, null);
+      return;
     }
 
     var labels = response.data.labels;
@@ -154,7 +155,8 @@ function getLabelId(auth, labelName, callback) {
         }
       }
 
-      return callback(null, labelId);
+      callback(null, labelId);
+      return;
     }
   });
 }
@@ -178,6 +180,7 @@ function processEmails(auth, labelId, callback) {
       //console.log('- %j', response);
       //console.log(err);
       callback(err, null);
+      return;
     }
 
     var messages = response.data.messages;
@@ -188,11 +191,13 @@ function processEmails(auth, labelId, callback) {
         processEmail(auth, messages[i], function(err, message){
           if (err){
             callback(err, null);
+            return;
           }
 
           processAttachment(auth, message, function(err, message){
             if(err){
               callback(err, null);
+              return;
             }
 
             updateLabel(auth, message.id, labelId, function(err, result){
@@ -201,13 +206,16 @@ function processEmails(auth, labelId, callback) {
               }
 
               //console.log(result);
-
+              callback(null, result);
+              return;
             });
           });
         });
       }
-
     }
+
+    callback(null, null);
+    return;
   });
 }
 
@@ -228,6 +236,7 @@ function processEmail(auth, message, callback) {
     if (err) {
       console.log(err);
       callback(err, null);
+      return;
     }
 
     var fullMessage = response.data;
@@ -249,10 +258,12 @@ function processEmail(auth, message, callback) {
     messageModel.save(function (err) {
       if (err){
           console.log(err);
-          return handleError(err);
+          handleError(err);
+          return;
       }
 
       callback(null, fullMessage);
+      return;
     });
   });
 }
@@ -281,6 +292,7 @@ function processAttachment(auth, message, callback) {
             console.log(attachment);
             console.log('The users.messages.attachments.get call returned an error: ' + err);
             callback(err, null);
+            return;
           }
 
           const buffer = Buffer.from(attachment.data.data, 'base64');
@@ -358,7 +370,8 @@ function processAttachment(auth, message, callback) {
                 aggregateReportModel.save(function (err) {
                   if (err){
                     console.log(err);
-                    return handleError(err);
+                    handleError(err);
+                    return;
                   }
 
                   console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
@@ -371,6 +384,7 @@ function processAttachment(auth, message, callback) {
             } else {
               // handle error
               callback("Haven't implemented yet", null);
+              return;
             }
           });
         });
