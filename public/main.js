@@ -49,7 +49,7 @@ function doAjax(url, onSuccess, onFailure) {
 }
 
 function renderCharts(aggregateReports) {
-	var action = {}, dmarc = {}, dkim = {}, spf = {};
+	var action = {}, dmarc = {}, dkim = {}, sourceIp = {}, spf = {};
 
 	for (var i = 0, len = aggregateReports.length; i < len; i++) {
 		var aggregateReport = aggregateReports[i];
@@ -65,6 +65,9 @@ function renderCharts(aggregateReports) {
 
 			var dkimResult = record.row.policyEvaluated.dkim;
 			dkim[dkimResult] = dkim[dkimResult] ? dkim[dkimResult] + record.row.count : record.row.count;
+
+			var sourceIpResult = record.row.sourceIp;
+			sourceIp[sourceIpResult] = sourceIp[sourceIpResult] ? sourceIp[sourceIpResult] + record.row.count : record.row.count;
 
 			var spfResult = record.row.policyEvaluated.spf;
 			spf[spfResult] = spf[spfResult] ? spf[spfResult] + record.row.count : record.row.count;
@@ -122,6 +125,17 @@ function renderCharts(aggregateReports) {
 			colors: colorScheme,
 			json: action,
 			type: 'pie'
+		}
+	});
+
+	c3.generate({
+		bindto: '#sourceIpGraph',
+		data: {
+			json: sourceIp,
+			type: 'pie'
+		},
+		legend: {
+			show: false
 		}
 	});
 }
