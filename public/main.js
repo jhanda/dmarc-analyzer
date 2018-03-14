@@ -1,10 +1,13 @@
+var ipAddresses = {};
+var ipAddressQueue = [];
+
 var tableDataTemplate = '<tr>' +
 	'<td>{gmailId}</td>' +
 	'<td>{orgName}</td>' +
 	'<td>{email}</td>' +
 	'<td>{begin}</td>' +
 	'<td>{end}</td>' +
-	'<td>{sourceIp}</td>' +
+	'<td class="ip" title="{sourceIp}">{sourceIp}</td>' +
 	'<td>{count}</td>' +
 	'<td>{dkim}</td>' +
 	'<td>{spf}</td>' +
@@ -48,6 +51,24 @@ function doAjax(url, onSuccess, onFailure) {
 	xmlhttprequest.send();
 }
 
+function friendlifyIpAddress(ip) {
+	var nodeList = document.querySelectorAll('.ip[title="' + ip + '"]');
+
+	if (nodeList.length) {
+		var location = ipAddresses[ip];
+
+		for (var i = 0, len = nodeList.length; i < len; i++) {
+			nodeList[i].title = location.isp + ' - ' + location.city + ', ' + location.countryCode;
+		}
+	}
+}
+
+function friendlifyIpAddresses() {
+	for (var ip in ipAddresses) {
+		friendlifyIpAddress(ip);
+	}
+}
+
 function renderCharts(aggregateReports) {
 	var action = {}, dmarc = {}, dkim = {}, sourceIp = {}, spf = {};
 
@@ -62,6 +83,10 @@ function renderCharts(aggregateReports) {
 
 		for (var j = 0, len2 = records.length; j < len2; j++) {
 			var record = records[j];
+
+			if (!ipAddresses.hasOwnProperty(record.row.sourceIp)) {
+				ipAddressQueue.push(record.row.sourceIp);
+			}
 
 			var dkimResult = record.row.policyEvaluated.dkim;
 			dkim[dkimResult] = dkim[dkimResult] ? dkim[dkimResult] + record.row.count : record.row.count;
@@ -181,6 +206,22 @@ function renderTable(aggregateReports, boundingBoxId) {
 	container.innerHTML = tableHTML;
 }
 
+function resolveIp() {
+	ip = ipAddressQueue.pop();
+
+	if (ip) {
+		doAjax(
+			'http://ip-api.com/json/' + ip,
+			function(response) {
+				ipAddresses[ip] = JSON.parse(response);
+			},
+			function(status) {
+				console.log('API call to resolve IP failed with status ' + status);
+			}
+		);
+	}
+}
+
 function toggleVerbose() {
 	var hidden = document.getElementById('table').classList.toggle('hide');
 
@@ -210,4 +251,7 @@ function updateData(query) {
 
 document.addEventListener('DOMContentLoaded', function(event) {
 	updateData();
+
+	window.setInterval(resolveIp, 500);
+	window.setInterval(friendlifyIpAddresses, 2000);
 });
