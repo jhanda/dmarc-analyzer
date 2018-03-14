@@ -7,8 +7,6 @@ var AggregateReport = require('./models/AggregateReport.js');
 var mongoose        = require('mongoose');
 var parseString     = require('xml2js').parseString;
 const zlib          = require('zlib');
-var yauzl = require("yauzl");
-var toString = require('stream-to-string')
 
 
 // Sets the connection to MongoDB
