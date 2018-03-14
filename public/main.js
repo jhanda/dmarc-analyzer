@@ -69,6 +69,17 @@ function friendlifyIpAddresses() {
 	}
 }
 
+function getUrlElements() {
+	var url = window.location.href;
+	var index = url.indexOf('?');
+
+	if (index < 0) {
+		return [url, ''];
+	}
+
+	return [url.slice(0, index), url.slice(index + 1)];
+}
+
 function renderCharts(aggregateReports) {
 	var action = {}, dmarc = {}, dkim = {}, sourceIp = {}, spf = {};
 
@@ -232,7 +243,11 @@ function updateData(query) {
 	var url = '/aggregatereports';
 
 	if (query) {
-		url += '?' + query;
+		query = '?' + query;
+		url += query;
+	}
+	else {
+		query = '';
 	}
 
 	doAjax(
@@ -242,6 +257,14 @@ function updateData(query) {
 
 			renderCharts(obj);
 			renderTable(obj, 'table');
+
+			window.history.pushState(
+				{
+					"html": document.documentElement.innerHTML,
+					"pageTitle": document.title
+				},
+				"", getUrlElements()[0] + query
+			);
 		},
 		function(status) {
 			alert('Request responded with status ' + status)
@@ -250,6 +273,8 @@ function updateData(query) {
 }
 
 document.addEventListener('DOMContentLoaded', function(event) {
+	document.getElementById('filter').value = getUrlElements()[1];
+
 	updateData();
 
 	window.setInterval(resolveIp, 500);
