@@ -28,7 +28,26 @@ router.get('/', function (req, res, next) {
     if (req.query.orgName){
         queryObject = {'reportMetadata.orgName':req.query.orgName};
     } 
-    
+
+    //Check for sourceIp
+    if (req.query.sourceIp){
+        
+        queryObject = {
+            'record':{
+                '$elemMatch':{
+                    'row.sourceIp':{
+                        '$regex': new RegExp(req.query.sourceIp)
+                    } 
+                }
+            }
+        }
+    } 
+
+    console.log(queryObject);
+
+//    db.aggregatereports.find({'record': {$elemMatch: {'row.sourceIp':{ $regex: /54.174.52/ }}}});
+
+
     AggregateReport.
         find(queryObject).
         select(select).
