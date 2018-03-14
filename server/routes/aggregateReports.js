@@ -26,24 +26,35 @@ router.get('/', function (req, res, next) {
 
     //Check for orgName
     if (req.query.orgName){
-        var orgQuery = {'reportMetadata.orgName':req.query.orgName};
+        
+        var orgQuery = {
+            'reportMetadata.orgName':{
+                $regex: new RegExp(req.query.orgName)
+            }
+        };
+
         queryObject.$and.push(orgQuery);
     } 
-
 
     //Check for sourceIp
     if (req.query.sourceIp){
         
         var ipQuery = {
             'record':{
-                '$elemMatch':{
+                $elemMatch:{
                     'row.sourceIp':{
-                        '$regex': new RegExp(req.query.sourceIp)
+                        $regex: new RegExp(req.query.sourceIp)
                     } 
                 }
             }
         }
         queryObject.$and.push(ipQuery);
+    }
+
+    //Query returns no results if there is an empty $and array, so delete if 
+    //we aren't using it.
+    if (queryObject.$and.length == 0){
+        delete queryObject.$and;
     }
     
     AggregateReport.
