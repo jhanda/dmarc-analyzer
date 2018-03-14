@@ -86,14 +86,14 @@ function renderCharts(aggregateReports) {
 	for (var i = 0, len = aggregateReports.length; i < len; i++) {
 		var aggregateReport = aggregateReports[i];
 
-		var records = aggregateReport.record;
+		var records = aggregateReport.records;
 
 		if (!records) {
 			continue;
 		}
 
 		for (var j = 0, len2 = records.length; j < len2; j++) {
-			var record = records[j];
+			var record = records[j].record;
 
 			if (!ipAddresses.hasOwnProperty(record.row.sourceIp)) {
 				ipAddressQueue.push(record.row.sourceIp);
@@ -184,14 +184,14 @@ function renderTable(aggregateReports, boundingBoxId) {
 	for (var i = 0, len = aggregateReports.length; i < len; i++) {
 		var aggregateReport = aggregateReports[i];
 
-		var records = aggregateReport.record;
+		var records = aggregateReport.records;
 
 		if (!records) {
 			continue;
 		}
 
 		for (var j = 0, len2 = records.length; j < len2; j++) {
-			var record = records[j];
+			var record = records[j].record;
 
 			tableHTML += tableDataTemplate
 				.replace(/{gmailId}/g, aggregateReport.gmailId)
