@@ -197,7 +197,7 @@ function updateData(query) {
 	doAjax(
 		url,
 		function(json) {
-			var obj = eval(json);
+			var obj = JSON.parse(json);
 
 			renderCharts(obj);
 			renderTable(obj, 'table');
