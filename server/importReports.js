@@ -2,12 +2,14 @@ var fs              = require('fs');
 var readline        = require('readline');
 var {google}        = require('googleapis');
 const {GoogleAuth, JWT, OAuth2Client} = require('google-auth-library');
-//var googleAuth      = require('google-auth-library');
 var Email           = require('./models/Email.js');
 var AggregateReport = require('./models/AggregateReport.js');
 var mongoose        = require('mongoose');
 var parseString     = require('xml2js').parseString;
 const zlib          = require('zlib');
+var yauzl = require("yauzl");
+var toString = require('stream-to-string')
+
 
 // Sets the connection to MongoDB
 mongoose.connect("mongodb://127.0.0.1/dmarc-analyzer");
@@ -176,9 +178,6 @@ function processEmails(auth, labelId, callback) {
     labelIds:['Label_2']
   }, function(err, response) {
     if (err) {
-      //console.log("error in process emails - " );
-      //console.log('- %j', response);
-      //console.log(err);
       callback(err, null);
       return;
     }
@@ -240,14 +239,6 @@ function processEmail(auth, message, callback) {
     }
 
     var fullMessage = response.data;
-
-    if (message.id == '161fa6521c6e2949'){
-      //console.log('Bad message --- %j', fullMessage);
-    } 
-    
-    if (message.id == '161fdf9847bccedc'){
-      //console.log('Good message --- %j', fullMessage);
-    } 
     
     var headerMap = new Map(response.data.payload.headers.map((i) => [i.name, i.value]));
 
@@ -298,52 +289,43 @@ function processAttachment(auth, message, callback) {
     'userId': 'me'
     }, function(err, attachment) {  
       if (err) {
-        console.log('The users.messages.attachments.get call returned an error: ' + err);
         callback(err, null);
         return;
       }
 
       const buffer = Buffer.from(attachment.data.data, 'base64');      
+  
+      if (attachmentDetails.extension == 'gz'){        
+        zlib.unzip(buffer, (err, buffer) => {    
           
-      if (attachmentDetails.extension == 'gz'){
-            zlib.unzip(buffer, (err, buffer) => {
-            
-              if (!err) {
-                //console.log(buffer.toString());
-                parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {
+          if(err){
+            callback(err, null);
+          }
+
+          parseString(buffer.toString(), { explicitArray : false, ignoreAttrs : true }, function (err, result) {        
+            var aggregateReportModel = buildAggregateModel(message.id, result);
                   
-                 var aggregateReportModel = buildAggregateModel(message.id, result);
-                  
-                 aggregateReportModel.save(function (err) {
-                    if (err){
-                      console.log(err);
-                      handleError(err);
-                      return;
-                    }
-  
-                    console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
-                    callback(null, message);
-                    return;
-                  });
-  
-  
-                });
-              } else {
+            aggregateReportModel.save(function (err) {
+              if (err){
                 console.log(err);
-                callback("Haven't implemented yet", null);
+                handleError(err);
                 return;
               }
+  
+              console.log("Saved report from : " + aggregateReportModel.reportMetadata.orgName);
+              callback(null, message);
+              return;
             });
-          } else if(attachmentDetails.extension == 'zip'){
-            
-            console.log ("We don't support zip attachments")
-
-          } else {
-            callback("Inavlid attachment file extension on " + part.filename, null);
-          }
-          
+          });
         });
-      }  
+      } else if(attachmentDetails.extension == 'zip'){
+        console.log ("We don't support zip attachments: " + attachmentDetails.filename);
+        callback("Unsupported attachment type (zip) " + attachmentDetails.filename, null);
+      } else {
+        callback("Unsupported attachment type(unknown) " + part.filename, null);
+      }    
+    });
+  }  
 
 /**
  * Update the label to indicate the message has been processed
