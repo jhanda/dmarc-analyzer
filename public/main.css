@@ -1,0 +1,57 @@
+#input form {
+	margin: 0 auto;
+	width: 90%;
+}
+
+#input input {
+	box-sizing: border-box;
+	font-size: 1.5em;
+	line-height: 2em;
+	padding: 0 0.4em;
+	width: 100%;
+}
+
+#wrapper {
+	padding: 1%;
+	text-align: center;
+}
+
+.column {
+	float: left;
+}
+
+.hide {
+	display: none;
+}
+
+.one-fourth {
+	width: 25%;
+}
+
+.separator {
+	border-top: 1px #DDD solid;
+	height: 1px;
+	margin: 2em auto;
+	width: 95%;
+}
+
+.wide-button {
+	line-height: 2em;
+	margin: 2em 0;
+	width: 90%;
+}
+
+html {
+	background: #EEE;
+}
+
+table {
+	background: #FAFAFA;
+	border-collapse: collapse;
+	margin: 0 auto;
+}
+
+table td, table th {
+	border: 1px #CCC solid;
+	padding: 0.2em;
+}
