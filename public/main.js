@@ -178,7 +178,7 @@ function updateData(query) {
 	var url = '/aggregatereports';
 
 	if (query) {
-		url += '?orgName=' + query;
+		url += '?' + query;
 	}
 
 	doAjax(
