@@ -40,9 +40,9 @@ router.get('/', function (req, res, next) {
     if (req.query.sourceIp){
         
         var ipQuery = {
-            'record':{
+            'records':{
                 $elemMatch:{
-                    'row.sourceIp':{
+                    'record.row.sourceIp':{
                         $regex: new RegExp(req.query.sourceIp)
                     } 
                 }
