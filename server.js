@@ -53,11 +53,11 @@ var aggregateReports = require('./server/routes/aggregateReports');
 app.use('/email', email);
 app.use('/aggregatereports', aggregateReports);
 
-// Point static path to dist
-app.use(express.static(path.join(__dirname, 'dist')));
+// Point static path to public/
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+  res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 // Listen
