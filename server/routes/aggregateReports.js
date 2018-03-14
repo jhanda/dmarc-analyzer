@@ -6,7 +6,7 @@ var AggregateReport = require('../models/AggregateReport.js')
 router.get('/', function (req, res, next) {  
    
     var select = "";
-    var queryObject = {}
+    var queryObject = {$and: []};
 
     //Check for filter query param, which should be a comma delimited list that
     // can contain reportMetadata, record, or policyPublished
@@ -26,13 +26,15 @@ router.get('/', function (req, res, next) {
 
     //Check for orgName
     if (req.query.orgName){
-        queryObject = {'reportMetadata.orgName':req.query.orgName};
+        var orgQuery = {'reportMetadata.orgName':req.query.orgName};
+        queryObject.$and.push(orgQuery);
     } 
+
 
     //Check for sourceIp
     if (req.query.sourceIp){
         
-        queryObject = {
+        var ipQuery = {
             'record':{
                 '$elemMatch':{
                     'row.sourceIp':{
@@ -41,13 +43,9 @@ router.get('/', function (req, res, next) {
                 }
             }
         }
-    } 
-
-    console.log(queryObject);
-
-//    db.aggregatereports.find({'record': {$elemMatch: {'row.sourceIp':{ $regex: /54.174.52/ }}}});
-
-
+        queryObject.$and.push(ipQuery);
+    }
+    
     AggregateReport.
         find(queryObject).
         select(select).
