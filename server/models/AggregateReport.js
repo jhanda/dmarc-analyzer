@@ -35,15 +35,18 @@ var AggregateReportSchema = new Schema({
     },
     identifiers: {
       headerFrom: String,
+      envelopeFrom: String
     },
     authResults:{
       spf: {
         domain: String,
-        result: String
+        result: String,
+        scope: String
       },
       dkim: {
         domain: String,
-        result: String
+        result: String,
+        scope: String
       }
     }
   }],

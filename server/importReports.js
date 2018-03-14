@@ -417,48 +417,104 @@ function buildAggregateModel(messageId, result){
 
     //TODO:  Add a null check before adding each part of the object.
     //       Some reports don't have the auth_results.dkim section
-    for (var i = 0; i < result.feedback.record.length; i++){
-      var record = {
-        row: {
-          sourceIp: result.feedback.record[i].row.source_ip,
-          count: result.feedback.record[i].row.count,
-          policyEvaluated: {
-            disposition: result.feedback.record[i].row.policy_evaluated.disposition,
-            dkim: result.feedback.record[i].row.policy_evaluated.dkim,
-            spf: result.feedback.record[i].row.policy_evaluated.spf
+    if(result.feedback.record.length){
+      for (var i = 0; i < result.feedback.record.length; i++){
+        
+        var record = {
+          row: {
+            sourceIp: result.feedback.record[i].row.source_ip,
+            count: result.feedback.record[i].row.count,
+            policyEvaluated: {
+              disposition: result.feedback.record[i].row.policy_evaluated.disposition,
+              dkim: result.feedback.record[i].row.policy_evaluated.dkim,
+              spf: result.feedback.record[i].row.policy_evaluated.spf
+            }
           },
           identifiers: {
-            headerFrom: result.feedback.record[i].identifiers.header_from
+            headerFrom: result.feedback.record[i].identifiers.header_from,
+            envelopeFrom: result.feedback.record[i].identifiers.envelope_from
           }
         }
-      }
-
-      //Check for authResults and addThem
-      if (result.feedback.record[i].auth_results){
-        var authResultsObj = new Object();
-
-        if(result.feedback.record[i].auth_results.spf){
-          var spfObj = {
-            domain: result.feedback.record[i].auth_results.spf.domain,
-            result: result.feedback.record[i].auth_results.spf.result
-          };
-
-          authResultsObj.spf = spfObj;
+        
+        //Check for authResults and addThem
+        if (result.feedback.record[i].auth_results){
+          var authResultsObj = new Object();
+  
+          if(result.feedback.record[i].auth_results.spf){
+  
+            var spfObj = {
+              domain: result.feedback.record[i].auth_results.spf.domain,
+              result: result.feedback.record[i].auth_results.spf.result,
+              scope: result.feedback.record[i].auth_results.spf.scope
+            };
+  
+            authResultsObj.spf = spfObj;
+          }
+  
+          if(result.feedback.record[i].auth_results.dkim){
+            var dkimObj = {
+              domain: result.feedback.record[i].auth_results.dkim.domain,
+              result: result.feedback.record[i].auth_results.dkim.result,
+              scope: result.feedback.record[i].auth_results.dkim.scope
+            };
+  
+            authResultsObj.dkim = dkimObj;
+          }
+  
+          record.authResults = authResultsObj;
         }
-
-        if(result.feedback.record[i].auth_results.dkim){
-          var dkimObj = {
-            domain: result.feedback.record[i].auth_results.dkim.domain,
-            result: result.feedback.record[i].auth_results.dkim.result
-          };
-
-          authResultsObj.dkim = dkimObj;
-        }
-
-        record.authResults = authResultsObj;
+  
+        aggregateReportModel.record.push(record);
       }
+  
+    }else{
 
-      aggregateReportModel.record.push(record);
-    }
+      var record = {
+          row: {
+            sourceIp: result.feedback.record.row.source_ip,
+            count: result.feedback.record.row.count,
+            policyEvaluated: {
+              disposition: result.feedback.record.row.policy_evaluated.disposition,
+              dkim: result.feedback.record.row.policy_evaluated.dkim,
+              spf: result.feedback.record.row.policy_evaluated.spf
+            }
+          },
+          identifiers: {
+            headerFrom: result.feedback.record.identifiers.header_from,
+            envelopeFrom: result.feedback.record.identifiers.envelope_from
+          }
+        }
+          
+        //Check for authResults and addThem
+        if (result.feedback.record.auth_results){
+          var authResultsObj = new Object();
+  
+          if(result.feedback.record.auth_results.spf){
+  
+            var spfObj = {
+              domain: result.feedback.record.auth_results.spf.domain,
+              result: result.feedback.record.auth_results.spf.result,
+              scope: result.feedback.record.auth_results.spf.scope
+            };
+  
+            authResultsObj.spf = spfObj;
+          }
+  
+          if(result.feedback.record.auth_results.dkim){
+            var dkimObj = {
+              domain: result.feedback.record.auth_results.dkim.domain,
+              result: result.feedback.record.auth_results.dkim.result,
+              scope: result.feedback.record.auth_results.dkim.scope
+            };
+  
+            authResultsObj.dkim = dkimObj;
+          }
+  
+          record.authResults = authResultsObj;
+        }
+  
+        aggregateReportModel.record.push(record);
+      }  
+
     return aggregateReportModel;
 }

@@ -24,12 +24,10 @@ router.get('/', function (req, res, next) {
         }
     }
 
-    //Check for name filter
+    //Check for orgName
     if (req.query.orgName){
         queryObject = {'reportMetadata.orgName':req.query.orgName};
-    }
-    
-    console.log(queryObject);
+    } 
     
     AggregateReport.
         find(queryObject).
