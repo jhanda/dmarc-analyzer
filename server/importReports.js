@@ -412,7 +412,8 @@ function buildAggregateModel(messageId, result){
         p: result.feedback.policy_published.p,
         sp: result.feedback.policy_published.sp,
         pct: result.feedback.policy_published.pct
-      }
+      },
+      records:[]
     });
 
     //TODO:  Add a null check before adding each part of the object.
@@ -421,18 +422,20 @@ function buildAggregateModel(messageId, result){
       for (var i = 0; i < result.feedback.record.length; i++){
         
         var record = {
-          row: {
-            sourceIp: result.feedback.record[i].row.source_ip,
-            count: result.feedback.record[i].row.count,
-            policyEvaluated: {
-              disposition: result.feedback.record[i].row.policy_evaluated.disposition,
-              dkim: result.feedback.record[i].row.policy_evaluated.dkim,
-              spf: result.feedback.record[i].row.policy_evaluated.spf
+          record:{
+            row: {
+              sourceIp: result.feedback.record[i].row.source_ip,
+              count: result.feedback.record[i].row.count,
+              policyEvaluated: {
+                disposition: result.feedback.record[i].row.policy_evaluated.disposition,
+                dkim: result.feedback.record[i].row.policy_evaluated.dkim,
+                spf: result.feedback.record[i].row.policy_evaluated.spf
+              }
+            },
+            identifiers: {
+              headerFrom: result.feedback.record[i].identifiers.header_from,
+              envelopeFrom: result.feedback.record[i].identifiers.envelope_from
             }
-          },
-          identifiers: {
-            headerFrom: result.feedback.record[i].identifiers.header_from,
-            envelopeFrom: result.feedback.record[i].identifiers.envelope_from
           }
         }
         
@@ -464,12 +467,13 @@ function buildAggregateModel(messageId, result){
           record.authResults = authResultsObj;
         }
   
-        aggregateReportModel.record.push(record);
+        aggregateReportModel.records.push(record);
       }
   
     }else{
 
       var record = {
+        record:{
           row: {
             sourceIp: result.feedback.record.row.source_ip,
             count: result.feedback.record.row.count,
@@ -484,6 +488,7 @@ function buildAggregateModel(messageId, result){
             envelopeFrom: result.feedback.record.identifiers.envelope_from
           }
         }
+      }
           
         //Check for authResults and addThem
         if (result.feedback.record.auth_results){
@@ -513,7 +518,7 @@ function buildAggregateModel(messageId, result){
           record.authResults = authResultsObj;
         }
   
-        aggregateReportModel.record.push(record);
+        aggregateReportModel.records.push(record);
       }  
 
     return aggregateReportModel;

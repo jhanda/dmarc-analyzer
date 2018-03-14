@@ -23,30 +23,32 @@ var AggregateReportSchema = new Schema({
     sp: String,
     pct: Number
   },
-  record: [{
-    row: {
-      sourceIp: String,
-      count: Number,
-      policyEvaluated: {
-        disposition: String,
-        dkim: String,
-        spf: String
-      }
-    },
-    identifiers: {
-      headerFrom: String,
-      envelopeFrom: String
-    },
-    authResults:{
-      spf: {
-        domain: String,
-        result: String,
-        scope: String
+  records: [{
+    record:{
+      row: {
+        sourceIp: String,
+        count: Number,
+        policyEvaluated: {
+          disposition: String,
+          dkim: String,
+          spf: String
+        }
       },
-      dkim: {
-        domain: String,
-        result: String,
-        scope: String
+      identifiers: {
+        headerFrom: String,
+        envelopeFrom: String
+      },
+      authResults:{
+        spf: {
+          domain: String,
+          result: String,
+          scope: String
+        },
+        dkim: {
+          domain: String,
+          result: String,
+          scope: String
+        }
       }
     }
   }],
