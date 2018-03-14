@@ -1,14 +1,14 @@
 var tableDataTemplate = '<tr>' +
-	'<td>{gmailId}</td>' +
-	'<td>{orgName}</td>' +
-	'<td>{email}</td>' +
-	'<td>{begin}</td>' +
-	'<td>{end}</td>' +
-	'<td>{sourceIp}</td>' +
-	'<td>{count}</td>' +
-	'<td>{dkim}</td>' +
-	'<td>{spf}</td>' +
-	'<td>{action}</td>' +
+	'<td title="gmailId"><a href="/email/{gmailId}">{gmailId}</a></td>' +
+	'<td title="orgName">{orgName}</td>' +
+	'<td title="email">{email}</td>' +
+	'<td title="begin">{begin}</td>' +
+	'<td title="end">{end}</td>' +
+	'<td title="sourceIp">{sourceIp}</td>' +
+	'<td title="count">{count}</td>' +
+	'<td title="dkim">{dkim}</td>' +
+	'<td title="spf">{spf}</td>' +
+	'<td title="action">{action}</td>' +
 	'</tr>';
 
 var tableEnd = '</table>';
@@ -145,16 +145,16 @@ function renderTable(aggregateReports, boundingBoxId) {
 			var record = records[j];
 
 			tableHTML += tableDataTemplate
-				.replace('{gmailId}', aggregateReport.gmailId)
-				.replace('{orgName}', aggregateReport.reportMetadata.orgName)
-				.replace('{email}', aggregateReport.reportMetadata.email)
-				.replace('{begin}', aggregateReport.reportMetadata.dateRange.begin)
-				.replace('{end}', aggregateReport.reportMetadata.dateRange.end)
-				.replace('{sourceIp}', record.row.sourceIp)
-				.replace('{count}', record.row.count)
-				.replace('{dkim}', record.row.policyEvaluated.dkim)
-				.replace('{spf}', record.row.policyEvaluated.spf)
-				.replace('{action}', function() {
+				.replace(/{gmailId}/g, aggregateReport.gmailId)
+				.replace(/{orgName}/g, aggregateReport.reportMetadata.orgName)
+				.replace(/{email}/g, aggregateReport.reportMetadata.email)
+				.replace(/{begin}/g, aggregateReport.reportMetadata.dateRange.begin)
+				.replace(/{end}/g, aggregateReport.reportMetadata.dateRange.end)
+				.replace(/{sourceIp}/g, record.row.sourceIp)
+				.replace(/{count}/g, record.row.count)
+				.replace(/{dkim}/g, record.row.policyEvaluated.dkim)
+				.replace(/{spf}/g, record.row.policyEvaluated.spf)
+				.replace(/{action}/g, function() {
 					var failed = (record.row.policyEvaluated.dkim == 'fail') &&
 						(record.row.policyEvaluated.spf == 'fail');
 
