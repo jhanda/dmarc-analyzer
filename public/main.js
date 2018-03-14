@@ -1,5 +1,5 @@
 var tableDataTemplate = '<tr>' +
-	'<td title="gmailId"><a href="/email/{gmailId}">{gmailId}</a></td>' +
+	'<td title="gmailId">{gmailId}</td>' +
 	'<td title="orgName">{orgName}</td>' +
 	'<td title="email">{email}</td>' +
 	'<td title="begin">{begin}</td>' +
@@ -9,6 +9,7 @@ var tableDataTemplate = '<tr>' +
 	'<td title="dkim">{dkim}</td>' +
 	'<td title="spf">{spf}</td>' +
 	'<td title="action">{action}</td>' +
+	'<td><a href="/email/{gmailId}">Email</a></td>' +
 	'</tr>';
 
 var tableEnd = '</table>';
@@ -25,6 +26,7 @@ var tableStart = '<table>' +
 	'<th>DKIM Passed</th>' +
 	'<th>SPF Passed</th>' +
 	'<th>Action Taken</th>' +
+	'<th>Links</th>' +
 	'</tr>';
 
 
@@ -47,10 +49,7 @@ function doAjax(url, onSuccess, onFailure) {
 }
 
 function renderCharts(aggregateReports) {
-	var action = {};
-	var aggregate = {};
-	var dkim = {};
-	var spf = {};
+	var action = {}, dmarc = {}, dkim = {}, spf = {};
 
 	for (var i = 0, len = aggregateReports.length; i < len; i++) {
 		var aggregateReport = aggregateReports[i];
@@ -65,20 +64,20 @@ function renderCharts(aggregateReports) {
 			var record = records[j];
 
 			var dkimResult = record.row.policyEvaluated.dkim;
-			dkim[dkimResult] = (dkim[dkimResult]) ? dkim[dkimResult] + record.row.count : record.row.count;
+			dkim[dkimResult] = dkim[dkimResult] ? dkim[dkimResult] + record.row.count : record.row.count;
 
 			var spfResult = record.row.policyEvaluated.spf;
-			spf[spfResult] = (spf[spfResult]) ? spf[spfResult] + record.row.count : record.row.count;
+			spf[spfResult] = spf[spfResult] ? spf[spfResult] + record.row.count : record.row.count;
 
 			var aggregateResult = (dkimResult == 'pass' || spfResult == 'pass')
 				? 'pass'
 				: 'fail';
-			aggregate[aggregateResult] = (aggregate[aggregateResult]) ? aggregate[aggregateResult] + record.row.count : record.row.count;
+			aggregate[aggregateResult] = aggregate[aggregateResult] ? aggregate[aggregateResult] + record.row.count : record.row.count;
 
 			var actionResult = (aggregateResult == 'pass')
 				? 'none'
 				: record.row.policyEvaluated.disposition;
-			action[actionResult] = (action[actionResult]) ? action[actionResult] + record.row.count : record.row.count;
+			action[actionResult] = action[actionResult] ? action[actionResult] + record.row.count : record.row.count;
 		}
 	}
 
