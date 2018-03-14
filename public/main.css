@@ -41,7 +41,12 @@
 	width: 90%;
 }
 
+html {
+	background: #EEE;
+}
+
 table {
+	background: #FAFAFA;
 	border-collapse: collapse;
 	margin: 0 auto;
 }
