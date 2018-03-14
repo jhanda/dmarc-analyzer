@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Liferay DMARC</title>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="input">
+				<form action="#" id="filterFm" onSubmit="event.preventDefault(); updateData(document.getElementById('filter').value);">
+					<input id="filter" name="filter" placeholder="Filter..." type="text" />
+				</form>
+			</div>
+
+			<div class="separator"></div>
+
+			<div id="charts">
+				<div class="column one-fourth">
+					<h4>DKIM Validation, % of Emails</h4>
+
+					<div id="dkimGraph"></div>
+				</div>
+				<div class="column one-fourth">
+					<h4>SPF Validation, % of Emails</h4>
+
+					<div id="spfGraph"></div>
+				</div>
+				<div class="column one-fourth">
+					<h4>Aggregate Validation, % of Emails</h4>
+
+					<div id="aggregateGraph"></div>
+				</div>
+				<div class="column one-fourth">
+					<h4>Action Taken, % of Emails</h4>
+
+					<div id="actionGraph"></div>
+				</div>
+			</div>
+
+			<button class="wide-button" id="verbose" onClick="toggleVerbose();" > Show Data </button>
+
+			<div class="hide" id="table"></div>
+		</div>
+	</body>
+</html>
