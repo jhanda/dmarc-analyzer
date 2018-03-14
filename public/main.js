@@ -12,7 +12,7 @@ var tableDataTemplate = '<tr>' +
 	'<td>{dkim}</td>' +
 	'<td>{spf}</td>' +
 	'<td>{action}</td>' +
-	'<td><a href="/email/{gmailId}">Email</a></td>' +
+	'<td><a href="/email/{gmailId}" target="_blank">Email</a></td>' +
 	'</tr>';
 
 var tableEnd = '</table>';
