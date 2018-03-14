@@ -69,12 +69,12 @@ function renderCharts(aggregateReports) {
 			var spfResult = record.row.policyEvaluated.spf;
 			spf[spfResult] = spf[spfResult] ? spf[spfResult] + record.row.count : record.row.count;
 
-			var aggregateResult = (dkimResult == 'pass' || spfResult == 'pass')
+			var dmarcResult = (dkimResult == 'pass' || spfResult == 'pass')
 				? 'pass'
 				: 'fail';
-			aggregate[aggregateResult] = aggregate[aggregateResult] ? aggregate[aggregateResult] + record.row.count : record.row.count;
+			dmarc[dmarcResult] = dmarc[dmarcResult] ? dmarc[dmarcResult] + record.row.count : record.row.count;
 
-			var actionResult = (aggregateResult == 'pass')
+			var actionResult = (dmarcResult == 'pass')
 				? 'none'
 				: record.row.policyEvaluated.disposition;
 			action[actionResult] = action[actionResult] ? action[actionResult] + record.row.count : record.row.count;
@@ -108,10 +108,10 @@ function renderCharts(aggregateReports) {
 	});
 
 	c3.generate({
-		bindto: '#aggregateGraph',
+		bindto: '#dmarcGraph',
 		data: {
 			colors: colorScheme,
-			json: aggregate,
+			json: dmarc,
 			type: 'pie'
 		}
 	});
