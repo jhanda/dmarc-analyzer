@@ -3,7 +3,7 @@ var ipAddressQueue = [];
 
 var tableDataTemplateFirstRow = '<tr>' +
 	'<td rowspan="{length}">{gmailId}</td>' +
-	'<td rowspan="{length}"><a href="/aggregateReports?orgName={orgName}">{orgName}</a></td>' +
+	'<td rowspan="{length}"><a href="?orgName={orgName}">{orgName}</a></td>' +
 	'<td rowspan="{length}">{email}</td>' +
 	'<td rowspan="{length}">{begin}</td>' +
 	'<td rowspan="{length}">{end}</td>' +
@@ -41,8 +41,6 @@ var tableStart = '<table>' +
 	'<th title="action">Action Taken</th>' +
 	'<th>Links</th>' +
 	'</tr>';
-
-
 
 function doAjax(url, onSuccess, onFailure) {
 	var xmlhttprequest = new XMLHttpRequest();
