@@ -1,12 +1,12 @@
 var ipAddresses = {};
 var ipAddressQueue = [];
 
-var tableDataTemplate = '<tr>' +
-	'<td>{gmailId}</td>' +
-	'<td>{orgName}</td>' +
-	'<td>{email}</td>' +
-	'<td>{begin}</td>' +
-	'<td>{end}</td>' +
+var tableDataTemplateFirstRow = '<tr>' +
+	'<td rowspan="{length}">{gmailId}</td>' +
+	'<td rowspan="{length}"><a href="/aggregateReports?orgName={orgName}">{orgName}</a></td>' +
+	'<td rowspan="{length}">{email}</td>' +
+	'<td rowspan="{length}">{begin}</td>' +
+	'<td rowspan="{length}">{end}</td>' +
 	'<td class="ip" title="{sourceIp}">{sourceIp}</td>' +
 	'<td>{count}</td>' +
 	'<td>{dkim}</td>' +
@@ -14,6 +14,16 @@ var tableDataTemplate = '<tr>' +
 	'<td>{action}</td>' +
 	'<td><a href="/email/{gmailId}" target="_blank">Email</a></td>' +
 	'</tr>';
+
+var tableDataTemplateAdditionalRows = '<tr>' +
+	'<td class="ip" title="{sourceIp}">{sourceIp}</td>' +
+	'<td>{count}</td>' +
+	'<td>{dkim}</td>' +
+	'<td>{spf}</td>' +
+	'<td>{action}</td>' +
+	'<td><a href="/email/{gmailId}" target="_blank">Email</a></td>' +
+	'</tr>';
+
 
 var tableEnd = '</table>';
 
@@ -33,9 +43,9 @@ var tableStart = '<table>' +
 	'</tr>';
 
 
+
 function doAjax(url, onSuccess, onFailure) {
 	var xmlhttprequest = new XMLHttpRequest();
-
 	xmlhttprequest.onreadystatechange = function() {
 		if (xmlhttprequest.readyState == XMLHttpRequest.DONE) {
 			if (xmlhttprequest.status == 200) {
@@ -193,12 +203,26 @@ function renderTable(aggregateReports, boundingBoxId) {
 		for (var j = 0, len2 = records.length; j < len2; j++) {
 			var record = records[j].record;
 
-			tableHTML += tableDataTemplate
-				.replace(/{gmailId}/g, aggregateReport.gmailId)
-				.replace(/{orgName}/g, aggregateReport.reportMetadata.orgName)
-				.replace(/{email}/g, aggregateReport.reportMetadata.email)
-				.replace(/{begin}/g, aggregateReport.reportMetadata.dateRange.begin)
-				.replace(/{end}/g, aggregateReport.reportMetadata.dateRange.end)
+			if (j==0){
+				tableHTML += tableDataTemplateFirstRow
+				    .replace(/{length}/g, records.length)
+					.replace(/{gmailId}/g, aggregateReport.gmailId)
+					.replace(/{orgName}/g, aggregateReport.reportMetadata.orgName)
+					.replace(/{email}/g, aggregateReport.reportMetadata.email)
+					.replace(/{begin}/g, aggregateReport.reportMetadata.dateRange.begin)
+					.replace(/{end}/g, aggregateReport.reportMetadata.dateRange.end)
+					.replace(/{sourceIp}/g, record.row.sourceIp)
+					.replace(/{count}/g, record.row.count)
+					.replace(/{dkim}/g, record.row.policyEvaluated.dkim)
+					.replace(/{spf}/g, record.row.policyEvaluated.spf)
+					.replace(/{action}/g, function() {
+						var failed = (record.row.policyEvaluated.dkim == 'fail') &&
+							(record.row.policyEvaluated.spf == 'fail');
+
+						return failed ? record.row.policyEvaluated.disposition : 'none';
+					});
+			}else{
+				tableHTML += tableDataTemplateAdditionalRows
 				.replace(/{sourceIp}/g, record.row.sourceIp)
 				.replace(/{count}/g, record.row.count)
 				.replace(/{dkim}/g, record.row.policyEvaluated.dkim)
@@ -209,6 +233,7 @@ function renderTable(aggregateReports, boundingBoxId) {
 
 					return failed ? record.row.policyEvaluated.disposition : 'none';
 				});
+			}
 		}
 	}
 
@@ -273,9 +298,10 @@ function updateData(query) {
 }
 
 document.addEventListener('DOMContentLoaded', function(event) {
-	document.getElementById('filter').value = getUrlElements()[1];
+	var query = getUrlElements()[1];
+	document.getElementById('filter').value = query
 
-	updateData();
+	updateData(query);
 
 	window.setInterval(resolveIp, 500);
 	window.setInterval(friendlifyIpAddresses, 2000);
